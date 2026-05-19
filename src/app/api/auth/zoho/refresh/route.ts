@@ -17,8 +17,8 @@ export async function POST(request: Request) {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({
         grant_type: "refresh_token",
-        client_id: CLIENT_ID || "",
-        client_secret: CLIENT_SECRET || "",
+        client_id: CLIENT_ID || "1000.1BUZ6Q71DUZOJNAFBBW200SPRA489G",
+        client_secret: CLIENT_SECRET || "555930a03238302226b2e88cfa91d12a25376f4b500",
         refresh_token: refresh_token,
       }),
     });

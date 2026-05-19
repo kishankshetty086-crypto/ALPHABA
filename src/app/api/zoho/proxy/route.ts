@@ -1,8 +1,13 @@
 import { NextResponse } from 'next/server';
+import { zohoRateLimiter } from '@/lib/rateLimiter';
 
 export async function POST(request: Request) {
   try {
     const { params, token } = await request.json();
+    
+    // Wait for Rate Limiter
+    await zohoRateLimiter.wait();
+
     const SHEET_ID = process.env.ZOHO_SHEET_ID;
     const ZOHO_SHEET_API_URL = process.env.ZOHO_SHEET_API_URL || "https://sheet.zoho.in/api/v2";
 

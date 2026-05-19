@@ -20,9 +20,9 @@ export async function GET(request: Request) {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({
         grant_type: "authorization_code",
-        client_id: CLIENT_ID || "",
-        client_secret: CLIENT_SECRET || "",
-        redirect_uri: REDIRECT_URI || "",
+        client_id: CLIENT_ID || "1000.1BUZ6Q71DUZOJNAFBBW200SPRA489G",
+        client_secret: CLIENT_SECRET || "55930a03238302226b2e88cfa91d12a25376f4b500",
+        redirect_uri: REDIRECT_URI || "https://github.com/kishankshetty086-crypto/AVAILABLEBASUPPORT/tree/main/src/app/api/auth/zoho/callback",
         code: code,
       }),
     });

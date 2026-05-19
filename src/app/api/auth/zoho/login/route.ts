@@ -8,10 +8,10 @@ export async function GET(request: Request) {
 
   const params = new URLSearchParams({
     scope: SCOPES,
-    client_id: CLIENT_ID || "",
+    client_id: CLIENT_ID || "1000.1BUZ6Q71DUZOJNAFBBW200SPRA489G",
     response_type: 'code',
     access_type: 'offline',
-    redirect_uri: REDIRECT_URI || "",
+    redirect_uri: REDIRECT_URI || "https://github.com/kishankshetty086-crypto/AVAILABLEBASUPPORT/tree/main/src/app/api/auth/zoho/callback",
     prompt: 'consent',
   });
 
