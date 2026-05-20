@@ -18,22 +18,22 @@ export default function AvailabilityPage() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatForm, setChatForm] = useState({ clientName: '', contactDetails: '', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [chatStatus, setChatStatus] = useState<{type: 'success' | 'error', text: string} | null>(null);
+  const [chatStatus, setChatStatus] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   const handleChatSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!chatForm.clientName || !chatForm.contactDetails || !chatForm.message) return;
-    
+
     setIsSubmitting(true);
     setChatStatus(null);
-    
+
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(chatForm)
       });
-      
+
       if (res.ok) {
         setChatStatus({ type: 'success', text: 'Message sent successfully!' });
         setChatForm({ clientName: '', contactDetails: '', message: '' });
@@ -57,7 +57,7 @@ export default function AvailabilityPage() {
     const interval = setInterval(() => {
       fetchData(false); // Pass false to not show full loading spinner on every background refresh
     }, 30000);
-    
+
     return () => clearInterval(interval);
   }, []);
 
@@ -65,10 +65,10 @@ export default function AvailabilityPage() {
     try {
       if (showLoader) setLoading(true);
       setError(null);
-      
+
       // cache: 'no-store' forces the browser not to cache the request
-      const response = await fetch("/api/availability?t=" + new Date().getTime(), { 
-        cache: "no-store" 
+      const response = await fetch("/api/availability?t=" + new Date().getTime(), {
+        cache: "no-store"
       });
 
       if (!response.ok) {
@@ -84,7 +84,7 @@ export default function AvailabilityPage() {
       }
 
       const result = await response.json();
-      
+
       // Map result from Zoho to our expected format
       if (result && result.records) {
         // Handle array of objects format (worksheet.records.fetch)
@@ -97,7 +97,7 @@ export default function AvailabilityPage() {
       } else if (result && result.range_details && Array.isArray(result.range_details)) {
         // Handle 2D array format (worksheet.content.get)
         const dataRows = result.range_details.filter((row: any) => row.row_index > 1); // skip header row 1
-        
+
         if (dataRows.length > 0) {
           const parsed = dataRows.map((row: any) => {
             const getCol = (idx: number) => {
@@ -147,6 +147,22 @@ export default function AvailabilityPage() {
     return 'status-unavailable';
   };
 
+  const sortedData = [...data].sort((a, b) => {
+    const getPriority = (status: string) => {
+      const lower = (status || "").toLowerCase();
+      if (lower.includes('not available') || lower.includes('unavailable')) return 3;
+      if (lower.includes('available')) return 1;
+      if (lower.includes('escalation')) return 2;
+      return 4;
+    };
+
+    const pA = getPriority(a.availability);
+    const pB = getPriority(b.availability);
+
+    if (pA !== pB) return pA - pB;
+    return (a.name || "").localeCompare(b.name || "");
+  });
+
   return (
     <div className={styles.container}>
       <header className={styles.header}>
@@ -169,7 +185,7 @@ export default function AvailabilityPage() {
                 {error}
               </div>
             )}
-            
+
             <div className={styles.tableContainer}>
               <table className={styles.table}>
                 <thead>
@@ -180,12 +196,12 @@ export default function AvailabilityPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {data.length === 0 ? (
+                  {sortedData.length === 0 ? (
                     <tr>
                       <td colSpan={3} className={styles.emptyState}>No data available</td>
                     </tr>
                   ) : (
-                    data.map((item, index) => (
+                    sortedData.map((item, index) => (
                       <tr key={index} className={styles.tableRow}>
                         <td className={styles.nameCell}>
                           <div className={styles.avatar}>{(item.name || "??").substring(0, 2)}</div>
@@ -211,12 +227,12 @@ export default function AvailabilityPage() {
 
             {/* Mobile Card Grid */}
             <div className={styles.cardGrid}>
-              {data.length === 0 ? (
+              {sortedData.length === 0 ? (
                 <div className={styles.emptyState}>No data available</div>
               ) : (
-                data.map((item, index) => (
-                  <div 
-                    key={index} 
+                sortedData.map((item, index) => (
+                  <div
+                    key={index}
                     className={styles.mobileCard}
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
@@ -224,7 +240,7 @@ export default function AvailabilityPage() {
                       <div className={styles.avatar}>{(item.name || "??").substring(0, 2)}</div>
                       <div className={styles.cardName}>{item.name || "Unknown"}</div>
                     </div>
-                    
+
                     <div className={styles.cardBody}>
                       <span className={`${styles.statusBadge} ${styles[getStatusColor(item.availability)]}`}>
                         <span className={styles.statusDot}></span>
@@ -249,7 +265,7 @@ export default function AvailabilityPage() {
       </main>
 
       {/* Floating Chat Button */}
-      <button 
+      <button
         className={styles.chatButton}
         onClick={() => setIsChatOpen(true)}
         aria-label="Open Chat"
@@ -265,43 +281,43 @@ export default function AvailabilityPage() {
           <div className={styles.modalContent}>
             <div className={styles.modalHeader}>
               <h2>Send Alert</h2>
-              <p style={{color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.5rem'}}>Notify the support team about a client issue</p>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.5rem' }}>Notify the support team about a client issue</p>
               <button className={styles.closeButton} onClick={() => setIsChatOpen(false)} aria-label="Close modal">&times;</button>
             </div>
-            
+
             <form onSubmit={handleChatSubmit}>
               <div className={styles.formGroup}>
                 <label htmlFor="clientName">Client Name *</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   id="clientName"
-                  className={styles.inputField} 
+                  className={styles.inputField}
                   value={chatForm.clientName}
-                  onChange={(e) => setChatForm({...chatForm, clientName: e.target.value})}
+                  onChange={(e) => setChatForm({ ...chatForm, clientName: e.target.value })}
                   required
                 />
               </div>
-              
+
               <div className={styles.formGroup}>
                 <label htmlFor="contactDetails">Contact Details *</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   id="contactDetails"
-                  className={styles.inputField} 
+                  className={styles.inputField}
                   value={chatForm.contactDetails}
-                  onChange={(e) => setChatForm({...chatForm, contactDetails: e.target.value})}
+                  onChange={(e) => setChatForm({ ...chatForm, contactDetails: e.target.value })}
                   required
                 />
               </div>
-              
+
               <div className={styles.formGroup}>
                 <label htmlFor="message">Message *</label>
-                <textarea 
+                <textarea
                   id="message"
-                  className={styles.inputField} 
-                  style={{minHeight: '100px', resize: 'vertical'}}
+                  className={styles.inputField}
+                  style={{ minHeight: '100px', resize: 'vertical' }}
                   value={chatForm.message}
-                  onChange={(e) => setChatForm({...chatForm, message: e.target.value})}
+                  onChange={(e) => setChatForm({ ...chatForm, message: e.target.value })}
                   required
                 />
               </div>
@@ -312,8 +328,8 @@ export default function AvailabilityPage() {
                 </div>
               )}
 
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className={styles.submitButton}
                 disabled={isSubmitting || !chatForm.clientName || !chatForm.contactDetails || !chatForm.message}
               >
