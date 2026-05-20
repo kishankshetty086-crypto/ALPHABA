@@ -72,7 +72,7 @@ export async function GET() {
 
     const formData = new URLSearchParams();
     formData.append("method", "worksheet.content.get");
-    formData.append("worksheet_name", "AVailability");
+    formData.append("worksheet_name", "Alpha");
 
     const response = await fetch(`${API_URL}/${SHEET_ID}`, {
       method: "POST",
